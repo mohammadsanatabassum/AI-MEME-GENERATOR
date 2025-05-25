@@ -1,0 +1,266 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const uploadTab = document.getElementById('upload-tab');
+    const topicTab = document.getElementById('topic-tab');
+    const uploadArea = document.getElementById('upload-area');
+    const topicArea = document.getElementById('topic-area');
+    const imageUpload = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const memeImage = document.getElementById('meme-image');
+    const topText = document.getElementById('top-text');
+    const bottomText = document.getElementById('bottom-text');
+    const generateBtn = document.getElementById('generate-btn');
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const shareBtn = document.getElementById('share-btn');
+    const memeStyleSelect = document.getElementById('meme-style-select');
+    const topicInput = document.getElementById('topic-input');
+    const suggestTopicsBtn = document.getElementById('suggest-topics');
+    const topicButtons = document.querySelectorAll('.topic-btn');
+    const aiThinking = document.getElementById('ai-thinking');
+    const notification = document.getElementById('notification');
+
+    // Current meme data
+    let currentMemeData = {
+        image: null,
+        topic: '',
+        style: 'classic',
+        topText: '',
+        bottomText: ''
+    };
+
+    // Tab switching
+    uploadTab.addEventListener('click', function() {
+        uploadTab.classList.add('active');
+        topicTab.classList.remove('active');
+        uploadArea.classList.remove('hidden');
+        topicArea.classList.add('hidden');
+        currentMemeData.image = null;
+        currentMemeData.topic = '';
+    });
+
+    topicTab.addEventListener('click', function() {
+        topicTab.classList.add('active');
+        uploadTab.classList.remove('active');
+        topicArea.classList.remove('hidden');
+        uploadArea.classList.add('hidden');
+        currentMemeData.image = null;
+    });
+
+    // Image upload handling
+    imageUpload.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                imagePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                imagePreview.style.display = 'block';
+                memeImage.src = event.target.result;
+                memeImage.style.display = 'block';
+                currentMemeData.image = event.target.result;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--primary-color)';
+        uploadArea.style.backgroundColor = 'rgba(108, 92, 231, 0.1)';
+    });
+
+    uploadArea.addEventListener('dragleave', function() {
+        uploadArea.style.borderColor = 'var(--secondary-color)';
+        uploadArea.style.backgroundColor = 'transparent';
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--secondary-color)';
+        uploadArea.style.backgroundColor = 'transparent';
+        
+        if (e.dataTransfer.files.length > 0) {
+            imageUpload.files = e.dataTransfer.files;
+            const event = new Event('change');
+            imageUpload.dispatchEvent(event);
+        }
+    });
+
+    // Topic selection
+    topicButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            currentMemeData.topic = this.textContent;
+            topicInput.value = this.textContent;
+            showNotification(`Topic set to: ${this.textContent}`);
+        });
+    });
+
+    suggestTopicsBtn.addEventListener('click', function() {
+        // In a real app, this would fetch trending topics from an API
+        showNotification('Fetching trending topics...');
+        setTimeout(() => {
+            showNotification('Here are some trending topics!');
+        }, 1000);
+    });
+
+    // Meme style selection
+    memeStyleSelect.addEventListener('change', function() {
+        currentMemeData.style = this.value;
+    });
+
+    // Generate meme text
+    generateBtn.addEventListener('click', function() {
+        if (!currentMemeData.image && !currentMemeData.topic) {
+            showNotification('Please upload an image or select a topic!', 'error');
+            return;
+        }
+
+        aiThinking.classList.remove('hidden');
+        
+        // Simulate AI processing (in a real app, this would call an API)
+        setTimeout(() => {
+            generateAIMemeText();
+            aiThinking.classList.add('hidden');
+        }, 2000);
+    });
+
+    // Regenerate meme text
+    regenerateBtn.addEventListener('click', function() {
+        if (!currentMemeData.image && !currentMemeData.topic) {
+            showNotification('Please upload an image or select a topic first!', 'error');
+            return;
+        }
+
+        aiThinking.classList.remove('hidden');
+        
+        setTimeout(() => {
+            generateAIMemeText();
+            aiThinking.classList.add('hidden');
+            showNotification('Meme text regenerated!');
+        }, 1500);
+    });
+
+    // Download meme
+    downloadBtn.addEventListener('click', function() {
+        if (!memeImage.src || memeImage.src === '') {
+            showNotification('Please generate a meme first!', 'error');
+            return;
+        }
+
+        // In a real app, we would use a canvas to combine image and text
+        // For this demo, we'll just download the image if it exists
+        if (currentMemeData.image) {
+            const link = document.createElement('a');
+            link.href = currentMemeData.image;
+            link.download = 'ai-meme-generator-' + Date.now() + '.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification('Meme downloaded!');
+        } else {
+            showNotification('Please upload an image to download', 'error');
+        }
+    });
+
+    // Share meme
+    shareBtn.addEventListener('click', function() {
+        if (!memeImage.src || memeImage.src === '') {
+            showNotification('Please generate a meme first!', 'error');
+            return;
+        }
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'Check out this AI-generated meme!',
+                text: currentMemeData.topText + ' ' + currentMemeData.bottomText,
+                url: window.location.href
+            }).catch(err => {
+                showNotification('Error sharing: ' + err, 'error');
+            });
+        } else {
+            showNotification('Web Share API not supported in your browser', 'warning');
+            // Fallback: copy to clipboard
+            const textToCopy = `${currentMemeData.topText}\n${currentMemeData.bottomText}\n\nGenerated with AI Meme Generator`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showNotification('Meme text copied to clipboard!');
+            }).catch(err => {
+                showNotification('Failed to copy text: ' + err, 'error');
+            });
+        }
+    });
+
+    // Helper function to generate AI meme text (simulated)
+    function generateAIMemeText() {
+        const styles = {
+            classic: {
+                top: ['WHEN', 'WHEN YOU', 'ME WHEN', 'HOW IT FEELS TO', 'TFW'],
+                bottom: ['BUT', 'BUT THEN', 'AND IT\'S JUST', 'AND YOU REALIZE', 'YET HERE WE ARE']
+            },
+            wholesome: {
+                top: ['LIFE IS BETTER', 'HAPPINESS IS', 'LOVE IS', 'FRIENDSHIP IS'],
+                bottom: ['WHEN YOU', 'JUST BEING', 'SHARING YOUR', 'APPRECIATING THE']
+            },
+            sarcastic: {
+                top: ['OH GREAT', 'WOW THANKS', 'JUST WHAT I NEEDED', 'PERFECT TIMING'],
+                bottom: ['EXACTLY WHAT I ASKED FOR', 'THIS IS FINE', 'NOTHING CAN GO WRONG', 'I LOVE THIS']
+            },
+            'dark-humor': {
+                top: ['WHEN YOU REALIZE', 'ME TRYING TO', 'HOW IT FEELS TO', 'TFW YOU'],
+                bottom: ['BUT LIFE SAYS NO', 'AND IT GETS WORSE', 'AND THEN YOU DIE', 'BUT THE VOICES DISAGREE']
+            },
+            trending: {
+                top: ['POV: YOU\'RE', 'LITERALLY NO ONE:', 'HOW IT STARTED', 'ME EXPLAINING TO'],
+                bottom: ['AND IT\'S WORKING', 'HOW IT\'S GOING', 'ME WHO DIDN\'T ASK', 'WHILE THEY\'RE']
+            }
+        };
+
+        const selectedStyle = styles[currentMemeData.style] || styles.classic;
+        const randomTop = selectedStyle.top[Math.floor(Math.random() * selectedStyle.top.length)];
+        const randomBottom = selectedStyle.bottom[Math.floor(Math.random() * selectedStyle.bottom.length)];
+
+        // If there's a topic, incorporate it
+        let topicPart = currentMemeData.topic ? ` ${currentMemeData.topic.toUpperCase()}` : '';
+        
+        currentMemeData.topText = randomTop + topicPart;
+        currentMemeData.bottomText = randomBottom + topicPart;
+
+        topText.textContent = currentMemeData.topText;
+        bottomText.textContent = currentMemeData.bottomText;
+
+        showNotification('Meme generated successfully!');
+    }
+
+    // Notification system
+    function showNotification(message, type = 'success') {
+        notification.textContent = message;
+        notification.className = 'notification';
+        
+        switch(type) {
+            case 'success':
+                notification.style.backgroundColor = 'var(--success-color)';
+                break;
+            case 'error':
+                notification.style.backgroundColor = 'var(--error-color)';
+                break;
+            case 'warning':
+                notification.style.backgroundColor = 'var(--warning-color)';
+                break;
+            default:
+                notification.style.backgroundColor = 'var(--primary-color)';
+        }
+        
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // Initialize with a random topic suggestion
+    const randomTopics = ['Work from home', 'AI takeover', 'Monday mood', 'Gym motivation', 'Social media', 'Online dating'];
+    const randomTopic = randomTopics[Math.floor(Math.random() * randomTopics.length)];
+    topicInput.placeholder = `e.g. ${randomTopic}`;
+});
