@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meme Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Meme Generator</h1>
+            <p>Upload an image or select a topic, and let AI generate hilarious meme text for you!</p>
+        </header>
+
+        <main>
+            <div class="generator-container">
+                <div class="input-section">
+                    <div class="upload-option active" id="upload-tab">
+                        <i class="fas fa-upload"></i> Upload Image
+                    </div>
+                    <div class="upload-option" id="topic-tab">
+                        <i class="fas fa-lightbulb"></i> Select Topic
+                    </div>
+
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="image-upload" accept="image/*" hidden>
+                        <label for="image-upload" class="upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop an image or click to browse</p>
+                            <div class="preview-container" id="image-preview"></div>
+                        </label>
+                    </div>
+
+                    <div class="topic-area hidden" id="topic-area">
+                        <div class="topic-input">
+                            <input type="text" id="topic-input" placeholder="Enter a topic (e.g. cats, programming, politics)">
+                            <button id="suggest-topics">Suggest Topics</button>
+                        </div>
+                        <div class="trending-topics">
+                            <h3>Trending Topics</h3>
+                            <div class="topic-buttons">
+                                <button class="topic-btn">Work from home</button>
+                                <button class="topic-btn">AI takeover</button>
+                                <button class="topic-btn">Monday mood</button>
+                                <button class="topic-btn">Gym motivation</button>
+                                <button class="topic-btn">Social media</button>
+                                <button class="topic-btn">Online dating</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="meme-style">
+                        <h3>Meme Style</h3>
+                        <select id="meme-style-select">
+                            <option value="classic">Classic Meme</option>
+                            <option value="wholesome">Wholesome</option>
+                            <option value="sarcastic">Sarcastic</option>
+                            <option value="dark-humor">Dark Humor</option>
+                            <option value="trending">Trending Format</option>
+                        </select>
+                    </div>
+
+                    <button id="generate-btn" class="generate-btn">
+                        <i class="fas fa-magic"></i> Generate Meme Text
+                    </button>
+                </div>
+
+                <div class="result-section">
+                    <div class="meme-display">
+                        <div class="meme-image-container">
+                            <img id="meme-image" src="" alt="Your meme will appear here">
+                            <div class="meme-text top-text" id="top-text"></div>
+                            <div class="meme-text bottom-text" id="bottom-text"></div>
+                        </div>
+                    </div>
+                    <div class="meme-controls">
+                        <button id="regenerate-btn" class="control-btn">
+                            <i class="fas fa-sync-alt"></i> Regenerate
+                        </button>
+                        <button id="download-btn" class="control-btn">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button id="share-btn" class="control-btn">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                    <div class="ai-thinking hidden" id="ai-thinking">
+                        <div class="spinner"></div>
+                        <p>AI is generating your meme...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="notification hidden" id="notification"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
